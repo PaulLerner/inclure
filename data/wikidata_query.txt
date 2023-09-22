@@ -1,0 +1,13 @@
+#Chats
+SELECT ?entity ?entityLabel ?entity_male_label ?entity_female_label
+WHERE 
+{
+  ?entity wdt:P2521 ?entity_female_label. 
+  
+  OPTIONAL { 
+  ?entity wdt:P3321 ?entity_male_label.
+  FILTER(LANG(?entity_male_label) = "fr").
+  }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". } 
+  FILTER(LANG(?entity_female_label) = "fr").
+}

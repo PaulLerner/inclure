@@ -1,0 +1,1 @@
+Veiller sur nos aînés en EHPAD avec 5 <Profession>aides-soignants</Profession> et une <Profession><Exclusif>infirmière</Exclusif></Profession> de nuit en plus par établissement, soit la création de 40 000 emplois.
