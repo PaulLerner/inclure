@@ -58,13 +58,12 @@ def exclure(tokens):
         todo = []
         bad_sentence = False
         for token in sentence:
-            if token.like_url:
+            if token.like_url or token.like_email:
                 bad_sentence = True
                 break
             if token.dep_=="ROOT" or token.pos_ in {"VERB","AUX"} or token.is_space:
                 continue
             if token.lemma == token.head.lemma and different_gender(token, token.head):
-                print(token,token.head,token.dep_,token.pos_,token.head.dep_,token.head.pos_,end=" ; ")
                 i = token.i-sentence.start
                 j = token.head.i-sentence.start
                 if j < i:
@@ -109,6 +108,7 @@ def exclure_batch(texts, sentencizer, model):
 def main(input_path_root: Path, output_path_root: Path):
     output_path_root.mkdir(exist_ok=True)
     sentencizer = French()
+    sentencizer.max_length = int(1e12)
     sentencizer.add_pipe('sentencizer')
     model = spacy.load("fr_dep_news_trf", disable="ner")
     for input_path in input_path_root.glob('*.jsonl'):
@@ -116,7 +116,7 @@ def main(input_path_root: Path, output_path_root: Path):
         output_path = output_path_root/(input_path.with_suffix(".tsv")).name
         if output_path.exists():
             continue
-        texts = pd.read_json(input_path, lines=True).content[:100]
+        texts = pd.read_json(input_path, lines=True).content
         training_pairs = exclure_batch(texts, sentencizer, model)
         with open(output_path, 'wt') as file:
             file.write("\n".join(training_pairs))
