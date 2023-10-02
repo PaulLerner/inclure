@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from jsonargparse import CLI
 from jsonargparse.typing import register_type
 from pathlib import Path
 import re
@@ -8,6 +7,9 @@ register_type(Path)
 
 
 extra_spaces = re.compile(r'\s+')
+# "·" (median) is not in Barthez vocabulary so we keep "." (dot) as sep to avoid retraining the voc
+# note that sacrebleu_13a (default) tokenizes "." (dot), e.g. "auteur . ice" but not "·" (median)
+# on the contrary, sacrebleu_intl (aka mteval-v14) tokenizes both "." and "·"
 SEP = r"\."
 # only lowercase because some sentences are stuck together e.g. "Ok.Le matin"
 LETTER = r"[a-zàâéèêëîïôùûüÿçæœ]"
