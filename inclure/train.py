@@ -261,6 +261,15 @@ class DataTrainingArguments:
             self.val_max_target_length = self.max_target_length
 
 
+def args_to_dict(model_args, data_args, training_args):
+    model_args = asdict(model_args)
+    data_args = asdict(data_args)
+    training_args = training_args.to_dict()
+    for args in [model_args, data_args]:
+        training_args.update(args)
+    return training_args
+
+
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -275,13 +284,9 @@ def main():
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     output_dir = Path(training_args.output_dir)
     output_dir.mkdir(exist_ok=True)
-    with open(output_dir/"model_args.json", "wt") as file:
-        json.dump(asdict(model_args), file)
-    with open(output_dir/"data_args.json", "wt") as file:
-        json.dump(asdict(data_args), file)
-    with open(output_dir/"training_args.json", "wt") as file:
-        json.dump(training_args.to_dict(), file)
-    
+    args_dict = args_to_dict(model_args, data_args, training_args)
+    with open(output_dir/"args.json", "wt") as file:
+        json.dump(args_dict, file, indent=4)
     if model_args.use_auth_token is not None:
         warnings.warn("The `use_auth_token` argument is deprecated and will be removed in v4.34.", FutureWarning)
         if model_args.token is not None:
