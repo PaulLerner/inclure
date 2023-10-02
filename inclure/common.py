@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from jsonargparse import CLI
 from jsonargparse.typing import register_type
 from pathlib import Path
 import re

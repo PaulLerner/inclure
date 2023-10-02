@@ -41,6 +41,10 @@ fix_sep = re.compile(SEP)
 fix_ss = re.compile(r"ss\b")
 
 
+def detect(text):
+    return inclusif_before_expr.search(text) is not None or inclusif_after_expr.search(text) is not None
+
+
 def sub(text):
     # remove extra seps e.g. "au.trices.teurs" -> "autrices.teurs"
     text = pre_expr.sub(pre_sub, text)
@@ -96,10 +100,20 @@ def exclure(tokens):
         yield training_pair       
         
         
-def exclure_batch(texts, sentencizer, model):
-    texts = [preproc(text) for text in texts]
+def exclure_batch(texts, sentencizer, model, detect_filter=False):
+    proc_texts = []
+    for text in tqdm(texts, desc="preprocessing"):
+        text = preproc(text)
+        # spacy is much more expensive than regex
+        # first process the whole document to see if it contains "écriture inclusive"
+        # process at the doc-level as the same doc may contain mixed-inclusive french writing styles 
+        # (one detected with regex and the other later detected with spacy) so we limit false negatives
+        if (not detect_filter) or (detect_filter and detect(text)):
+            proc_texts.append(text)
+    if detect_filter:
+        print(f"Filtered {len(proc_texts)} documents out of {len(texts)}")
     sents = []
-    for tokens in tqdm(sentencizer.pipe(texts), desc="sentencizing"):
+    for tokens in tqdm(sentencizer.pipe(proc_texts), desc="sentencizing"):
         for sent in tokens.sents:            
             sents.append(sent.text)
     training_pairs = []
@@ -109,7 +123,7 @@ def exclure_batch(texts, sentencizer, model):
     return training_pairs
         
     
-def main(input_path_root: Path, output_path_root: Path):
+def main(input_path_root: Path, output_path_root: Path, detect_filter: bool = False):
     output_path_root.mkdir(exist_ok=True)
     sentencizer = French()
     sentencizer.max_length = int(1e12)
@@ -121,7 +135,7 @@ def main(input_path_root: Path, output_path_root: Path):
         if output_path.exists():
             continue
         texts = pd.read_json(input_path, lines=True).content
-        training_pairs = exclure_batch(texts, sentencizer, model)
+        training_pairs = exclure_batch(texts, sentencizer, model, detect_filter=detect_filter)
         with open(output_path, 'wt') as file:
             file.write("\n".join(training_pairs))
         
