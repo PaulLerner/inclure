@@ -29,6 +29,8 @@ def keep_masc(a,b):
 
 
 fem_suffix = r"(esse|sse|e|euse|se|ienne|enne|nne|ne|ère|ere|re|trice|rice|ice)"
+# common extensions not to be confused with feminine suffixes
+domain_and_exts = re.compile(rf'\w+({SEP}(com|fr|net|org|html|be|ca|info|ch|style|screenshots|free|jpg|js|php|google|canadiantire))\b')
 pre_sub = r"\1\2"
 pre_expr = re.compile(rf"({LETTER}+){SEP}({LETTER}+{SEP}{LETTER}+)")
 inclusif_before_sub = r"\2"
@@ -55,6 +57,8 @@ def sub(text):
 
 def exclure(tokens):
     for sentence in tokens.sents:
+        if domain_and_exts.search(sentence.text) is not None:
+            continue
         todo = []
         bad_sentence = False
         for token in sentence:
@@ -74,7 +78,7 @@ def exclure(tokens):
         if not todo:
             x_sentence = sub(sentence.text)
             if x_sentence is not None and x_sentence != sentence.text:                
-                training_pair = (sentence.text, x_sentence)
+                training_pair = (sentence.text.strip(), x_sentence.strip())
                 yield training_pair   
             continue
         pi, pj, ptoken = todo[0]
@@ -88,7 +92,7 @@ def exclure(tokens):
         xx_sentence = sub(x_sentence)
         if xx_sentence is None:
             xx_sentence = x_sentence
-        training_pair = (sentence.text, xx_sentence)
+        training_pair = (sentence.text.strip(), xx_sentence.strip())
         yield training_pair       
         
         
@@ -96,7 +100,7 @@ def exclure_batch(texts, sentencizer, model):
     texts = [preproc(text) for text in texts]
     sents = []
     for tokens in tqdm(sentencizer.pipe(texts), desc="sentencizing"):
-        for sent in tokens.sents:
+        for sent in tokens.sents:            
             sents.append(sent.text)
     training_pairs = []
     for tokens in tqdm(model.pipe(sents, batch_size=2048), desc="excluding"):

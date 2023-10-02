@@ -9,8 +9,8 @@ register_type(Path)
 
 extra_spaces = re.compile(r'\s+')
 SEP = r"\."
-# same as "\w" but does not match digits
-LETTER = r"[^\d\W]"
+# only lowercase because some sentences are stuck together e.g. "Ok.Le matin"
+LETTER = r"[a-zàâéèêëîïôùûüÿçæœ]"
 sep_sub = rf"\1.\2"
 extra_seps = re.compile(rf'({LETTER})[·•]({LETTER})')
 
