@@ -34,7 +34,6 @@ from datasets import load_from_disk
 
 import transformers
 from transformers import (
-    AutoConfig,
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     DataCollatorForSeq2Seq,
@@ -473,7 +472,6 @@ def main():
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on prediction dataset",
             )
-
     # Data collator
     label_pad_token_id = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
     if data_args.pad_to_max_length:
@@ -507,7 +505,6 @@ def main():
 
         # Some simple post-processing
         decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
-
         result = metric.compute(predictions=decoded_preds, references=decoded_labels)
         result = {"bleu": result["score"]}
 
@@ -544,7 +541,11 @@ def main():
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()
-
+    # load checkpoint only if did not train before
+    elif training_args.resume_from_checkpoint is not None:
+        trainer._load_from_checkpoint(training_args.resume_from_checkpoint)
+    else:
+        logger.warn("Did not train nor load checkpoint -> zero-shot evaluation")
     # Evaluation
     results = {}
     max_length = (
