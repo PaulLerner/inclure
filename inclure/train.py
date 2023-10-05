@@ -154,26 +154,6 @@ class DataTrainingArguments:
             )
         },
     )
-    max_target_length: Optional[int] = field(
-        default=128,
-        metadata={
-            "help": (
-                "The maximum total sequence length for target text after tokenization. Sequences longer "
-                "than this will be truncated, sequences shorter will be padded."
-            )
-        },
-    )
-    val_max_target_length: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": (
-                "The maximum total sequence length for validation target text after tokenization. Sequences longer "
-                "than this will be truncated, sequences shorter will be padded. Will default to `max_target_length`."
-                "This argument is also used to override the ``max_length`` param of ``model.generate``, which is used "
-                "during ``evaluate`` and ``predict``."
-            )
-        },
-    )
     pad_to_max_length: bool = field(
         default=False,
         metadata={
@@ -208,15 +188,6 @@ class DataTrainingArguments:
             "help": (
                 "For debugging purposes or quicker training, truncate the number of prediction examples to this "
                 "value if set."
-            )
-        },
-    )
-    num_beams: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": (
-                "Number of beams to use for evaluation. This argument will be passed to ``model.generate``, "
-                "which is used during ``evaluate`` and ``predict``."
             )
         },
     )
@@ -256,8 +227,6 @@ class DataTrainingArguments:
         if self.validation_file is not None:
             extension = self.validation_file.split(".")[-1]
             assert extension in valid_extensions, "`validation_file` should be a jsonlines file."
-        if self.val_max_target_length is None:
-            self.val_max_target_length = self.max_target_length
 
 
 def args_to_dict(model_args, data_args, training_args):
@@ -357,6 +326,7 @@ def main():
 
     prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
 
+    
     # Preprocessing the datasets.
     # We need to tokenize inputs and targets.
     if training_args.do_train:
@@ -392,7 +362,9 @@ def main():
     target_lang = data_args.target_lang.split("_")[0]
 
     # Temporarily set max_target_length for training.
-    max_target_length = data_args.max_target_length
+    max_length = training_args.generation_max_length
+    max_target_length = training_args.generation_max_length
+    
     padding = "max_length" if data_args.pad_to_max_length else False
 
     if training_args.label_smoothing_factor > 0 and not hasattr(model, "prepare_decoder_input_ids_from_labels"):
@@ -438,7 +410,6 @@ def main():
             )
 
     if training_args.do_eval:
-        max_target_length = data_args.val_max_target_length
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
         eval_dataset = raw_datasets["validation"]
@@ -456,7 +427,6 @@ def main():
             )
 
     if training_args.do_predict:
-        max_target_length = data_args.val_max_target_length
         if "test" not in raw_datasets:
             raise ValueError("--do_predict requires a test dataset")
         predict_dataset = raw_datasets["test"]
@@ -548,12 +518,7 @@ def main():
         logger.warn("Did not train nor load checkpoint -> zero-shot evaluation")
     # Evaluation
     results = {}
-    max_length = (
-        training_args.generation_max_length
-        if training_args.generation_max_length is not None
-        else data_args.val_max_target_length
-    )
-    num_beams = data_args.num_beams if data_args.num_beams is not None else training_args.generation_num_beams
+    num_beams = training_args.generation_num_beams
     if training_args.do_eval:
         logger.info("*** Evaluate ***")
 
