@@ -26,9 +26,10 @@ from dataclasses import dataclass, field, asdict
 from typing import Optional
 from pathlib import Path
 import json
+from tqdm import tqdm
 
 import datasets
-import evaluate
+from evaluate import load as load_metric
 import numpy as np
 from datasets import load_from_disk
 
@@ -236,6 +237,16 @@ def args_to_dict(model_args, data_args, training_args):
     for args in [model_args, data_args]:
         training_args.update(args)
     return training_args
+
+
+def evaluate(trainer, max_length, num_beams, data_args, eval_dataset):    
+    metrics = trainer.evaluate(max_length=max_length, num_beams=num_beams, metric_key_prefix="eval")
+    max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
+    metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+    metrics["num_beams"] = num_beams
+    trainer.log_metrics("eval", metrics)
+    trainer.save_metrics("eval", metrics)
+    return metrics
 
 
 def main():
@@ -455,7 +466,7 @@ def main():
         )
 
     # Metric
-    metric = evaluate.load(data_args.metric_name_or_path)
+    metric = load_metric(data_args.metric_name_or_path)
 
     def postprocess_text(preds, labels):
         preds = [pred.strip() for pred in preds]
@@ -521,13 +532,16 @@ def main():
     num_beams = training_args.generation_num_beams
     if training_args.do_eval:
         logger.info("*** Evaluate ***")
-
-        metrics = trainer.evaluate(max_length=max_length, num_beams=num_beams, metric_key_prefix="eval")
-        max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
-        metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
-
-        trainer.log_metrics("eval", metrics)
-        trainer.save_metrics("eval", metrics)
+        
+        if num_beams == "tune":
+            metrics_wrt_beam = []
+            for num_beams in tqdm(list(range(1, 10)), desc="Tuning num_beams"):
+                metrics = evaluate(trainer, max_length, num_beams, data_args, eval_dataset)
+                metrics_wrt_beam.append(metrics)
+            with open(output_dir/"metrics_wrt_beam.json", "wt") as file:
+                json.dump(metrics_wrt_beam, file)
+        else:
+            evaluate(trainer, max_length, num_beams, data_args, eval_dataset)
 
     if training_args.do_predict:
         logger.info("*** Predict ***")
