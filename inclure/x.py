@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+"""
+usage: x.py [-h] [--config CONFIG] [--print_config [={comments,skip_null,skip_default}+]]
+            [--detect_filter {true,false}]
+            input_path_root output_path_root
+
+options:
+  -h, --help            Show this help message and exit.
+  --config CONFIG       Path to a configuration file.
+  --print_config [={comments,skip_null,skip_default}+]
+                        Print the configuration after applying all other arguments and exit.
+
+<function main at 0x7f2c884f1900>:
+  input_path_root       (required, type: <class 'Path'>)
+  output_path_root      (required, type: <class 'Path'>)
+  --detect_filter {true,false}
+                        (type: bool, default: False)
+"""
 from tqdm import tqdm
 
 import pandas as pd

@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+"""
+usage: data.py [-h] [--config CONFIG] [--print_config [={comments,skip_null,skip_default}+]]
+               data_root_path
+
+options:
+  -h, --help            Show this help message and exit.
+  --config CONFIG       Path to a configuration file.
+  --print_config [={comments,skip_null,skip_default}+]
+                        Print the configuration after applying all other arguments and exit.
+
+<function main at 0x7f6c10018ee0>:
+  data_root_path        (required, type: <class 'Path'>)
+"""
 
 from datasets import Dataset
 
