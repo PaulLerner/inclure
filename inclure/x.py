@@ -83,6 +83,7 @@ def exclure(tokens):
         todo = []
         bad_sentence = False
         for token in sentence:
+            # FIXME: better detector than this: gives a lot of false positives
             if token.like_url or token.like_email:
                 bad_sentence = True
                 break

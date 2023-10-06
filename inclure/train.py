@@ -569,9 +569,9 @@ class DataTrainingArguments:
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
     dataset_path: str = field(metadata={"help": "Path to the dataset to load from disk (via the datasets library)."})
+    source_lang: str = field(metadata={"help": "Source language id for translation."})
+    target_lang: str = field(metadata={"help": "Target language id for translation."})
     metric_name_or_path: str = field(default="sacrebleu")
-    source_lang: str = field(default=None, metadata={"help": "Source language id for translation."})
-    target_lang: str = field(default=None, metadata={"help": "Target language id for translation."})
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )
@@ -644,21 +644,6 @@ class DataTrainingArguments:
             )
         },
     )
-
-    def __post_init__(self):
-        if self.source_lang is None or self.target_lang is None:
-            raise ValueError("Need to specify the source language and the target language.")
-
-        # accepting both json and jsonl file extensions, as
-        # many jsonlines files actually have a .json extension
-        valid_extensions = ["json", "jsonl"]
-
-        if self.train_file is not None:
-            extension = self.train_file.split(".")[-1]
-            assert extension in valid_extensions, "`train_file` should be a jsonlines file."
-        if self.validation_file is not None:
-            extension = self.validation_file.split(".")[-1]
-            assert extension in valid_extensions, "`validation_file` should be a jsonlines file."
 
 
 def args_to_dict(model_args, data_args, training_args):
