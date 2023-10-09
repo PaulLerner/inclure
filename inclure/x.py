@@ -147,6 +147,7 @@ def main(input_path_root: Path, output_path_root: Path, detect_filter: bool = Fa
     sentencizer.max_length = int(1e12)
     sentencizer.add_pipe('sentencizer')
     model = spacy.load("fr_dep_news_trf", disable="ner")
+    # to reproduce, use fr_meta_part_115.jsonl  fr_meta_part_14.jsonl  fr_meta_part_166.jsonl  fr_meta_part_283.jsonl  fr_meta_part_351.jsonl
     for input_path in input_path_root.glob('*.jsonl'):
         print(input_path)
         output_path = output_path_root/(input_path.with_suffix(".tsv")).name
