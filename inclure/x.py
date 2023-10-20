@@ -29,6 +29,11 @@ from .common import Path, CLI, SEP, preproc, LETTER
 
 spacy.prefer_gpu()
 
+def get_gender(token):
+    gender = token.morph.get("Gender")
+    if not gender:
+        return None
+    return gender[0]
 
 def is_masc(token):
     gender = token.morph.get("Gender")
@@ -76,6 +81,20 @@ def sub(text):
     return text
 
 
+def gender_stat(tokens, gender_co):
+    for sentence in tokens.sents:
+        for token in sentence:
+            if token.dep_=="ROOT" or token.pos_ in {"VERB","AUX"} or token.is_space:
+                continue
+            if token.lemma == token.head.lemma:
+                i = token.i
+                j = token.head.i
+                if i < j:
+                    gender_co[(get_gender(token), get_gender(token.head))] += 1
+                else:
+                    gender_co[(get_gender(token.head), get_gender(token))] += 1
+           
+                
 def exclure(tokens):
     for sentence in tokens.sents:
         if domain_and_exts.search(sentence.text) is not None:
