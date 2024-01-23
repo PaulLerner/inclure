@@ -12,6 +12,7 @@ options:
 <function main at 0x7f6c10018ee0>:
   data_root_path        (required, type: <class 'Path'>)
 """
+import json
 
 from datasets import Dataset
 
@@ -20,15 +21,10 @@ from .common import CLI, Path
 
 def main(data_root_path: Path):
     data = []
-    for path in data_root_path.glob('*.tsv'):
+    for path in data_root_path.glob('*.json'):
         with open(path, 'rt') as file:
-            for line in file.readlines():
-                if not line:
-                    continue
-                pair = line.split("\t")
-                if len(pair) != 2:
-                    breakpoint()
-                data.append({'fri': pair[0], 'fr': pair[1]})
+            subset = json.load(file)
+        data.extend(subset)
     dataset = Dataset.from_dict({'translation': data})
     print(dataset)
     dataset = dataset.train_test_split(test_size=0.2, seed=0)
