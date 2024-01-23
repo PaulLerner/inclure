@@ -17,7 +17,7 @@ options:
                         (type: bool, default: False)
 """
 from tqdm import tqdm
-
+import json
 import pandas as pd
 import re
 
@@ -119,7 +119,7 @@ def exclure(tokens):
         if not todo:
             x_sentence = sub(sentence.text)
             if x_sentence is not None and x_sentence != sentence.text:                
-                training_pair = (sentence.text.strip(), x_sentence.strip())
+                training_pair = {"fri": sentence.text.strip(), "fr": x_sentence.strip(), "inflection": True, "coordination": False}
                 yield training_pair   
             continue
         pi, pj, ptoken = todo[0]
@@ -132,8 +132,11 @@ def exclure(tokens):
         x_sentence = "".join(x_sentence)
         xx_sentence = sub(x_sentence)
         if xx_sentence is None:
+            inflection = False
             xx_sentence = x_sentence
-        training_pair = (sentence.text.strip(), xx_sentence.strip())
+        else:
+            inflection = True
+        training_pair = {"fri": sentence.text.strip(), "fr": xx_sentence.strip(), "inflection": inflection, "coordination": True}
         yield training_pair       
         
         
@@ -156,7 +159,7 @@ def exclure_batch(texts, sentencizer, model, detect_filter=False):
     training_pairs = []
     for tokens in tqdm(model.pipe(sents, batch_size=2048), desc="excluding"):
         for training_pair in exclure(tokens):
-            training_pairs.append("\t".join(training_pair))
+            training_pairs.append(training_pair)
     return training_pairs
         
     
@@ -169,13 +172,13 @@ def main(input_path_root: Path, output_path_root: Path, detect_filter: bool = Fa
     # to reproduce, use fr_meta_part_115.jsonl  fr_meta_part_14.jsonl  fr_meta_part_166.jsonl  fr_meta_part_283.jsonl  fr_meta_part_351.jsonl
     for input_path in input_path_root.glob('*.jsonl'):
         print(input_path)
-        output_path = output_path_root/(input_path.with_suffix(".tsv")).name
+        output_path = output_path_root/(input_path.with_suffix(".json")).name
         if output_path.exists():
             continue
         texts = pd.read_json(input_path, lines=True).content
         training_pairs = exclure_batch(texts, sentencizer, model, detect_filter=detect_filter)
         with open(output_path, 'wt') as file:
-            file.write("\n".join(training_pairs))
+            json.dump(training_pairs, file)
         
         
 if __name__ == "__main__":
