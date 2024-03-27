@@ -1,21 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-usage: x.py [-h] [--config CONFIG] [--print_config [={comments,skip_null,skip_default}+]]
-            [--detect_filter {true,false}]
-            input_path_root output_path_root
-
-options:
-  -h, --help            Show this help message and exit.
-  --config CONFIG       Path to a configuration file.
-  --print_config [={comments,skip_null,skip_default}+]
-                        Print the configuration after applying all other arguments and exit.
-
-<function main at 0x7f2c884f1900>:
-  input_path_root       (required, type: <class 'Path'>)
-  output_path_root      (required, type: <class 'Path'>)
-  --detect_filter {true,false}
-                        (type: bool, default: False)
-"""
 from tqdm import tqdm
 import json
 import pandas as pd
@@ -164,6 +147,7 @@ def exclure_batch(texts, sentencizer, model, detect_filter=False):
         
     
 def main(input_path_root: Path, output_path_root: Path, detect_filter: bool = False):
+    """Generate inclusive to standard french sentence pairs from a large corpus (e.g. OSCAR)"""
     output_path_root.mkdir(exist_ok=True)
     sentencizer = French()
     sentencizer.max_length = int(1e12)
@@ -182,4 +166,4 @@ def main(input_path_root: Path, output_path_root: Path, detect_filter: bool = Fa
         
         
 if __name__ == "__main__":
-    CLI(main)
+    CLI(main, description=main.__doc__)

@@ -1,17 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-usage: data.py [-h] [--config CONFIG] [--print_config [={comments,skip_null,skip_default}+]]
-               data_root_path
-
-options:
-  -h, --help            Show this help message and exit.
-  --config CONFIG       Path to a configuration file.
-  --print_config [={comments,skip_null,skip_default}+]
-                        Print the configuration after applying all other arguments and exit.
-
-<function main at 0x7f6c10018ee0>:
-  data_root_path        (required, type: <class 'Path'>)
-"""
 import json
 
 from datasets import Dataset
@@ -20,6 +7,7 @@ from .common import CLI, Path
 
 
 def main(data_root_path: Path):
+    """Split data in train-dev-test"""
     data = []
     for path in data_root_path.glob('*.json'):
         with open(path, 'rt') as file:
@@ -37,4 +25,4 @@ def main(data_root_path: Path):
      
         
 if __name__ == "__main__":
-    CLI(main)
+    CLI(main, description=main.__doc__)
