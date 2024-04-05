@@ -1,7 +1,7 @@
 # inclure
 Automatic translation from Standard to Inclusive French, and vice-versa. 
 
-Source code and data for the paper "INCLURE: a Dataset  and Toolkit for Inclusive French Translation" (Lerner and Grouin, 2024).
+Source code and data for the paper [INCLURE: a Dataset  and Toolkit for Inclusive French Translation](https://hal.science/hal-04531938) (Lerner and Grouin, 2024).
 
 ## getting the INCLURE data
 
@@ -39,4 +39,19 @@ By any chance, if you have access to Jean Zay, use `$DSDIR/OSCAR/fr_meta`
 
 ## reference
 
-TODO
+If you use our code or dataset, please cite
+
+```bib
+@inproceedings{lerner:hal-04531938,
+  TITLE = {{INCLURE: a Dataset and Toolkit for Inclusive French Translation}},
+  AUTHOR = {Lerner, Paul and Grouin, Cyril},
+  URL = {https://hal.science/hal-04531938},
+  BOOKTITLE = {{The 17th Workshop on Building and Using Comparable Corpora (BUCC @ LREC 2024)}},
+  ADDRESS = {Turin, Italy},
+  YEAR = {2024},
+  KEYWORDS = {Inclusive French ; Gender-neutral Language ; Parallel Corpus ; Neural Machine Translation},
+  PDF = {https://hal.science/hal-04531938/file/bucc_lrec_2024_inclure%283%29.pdf},
+  HAL_ID = {hal-04531938},
+  HAL_VERSION = {v1},
+}
+```
