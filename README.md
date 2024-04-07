@@ -1,7 +1,12 @@
 # inclure
+
+
 Automatic translation from Standard to Inclusive French, and vice-versa. 
 
 Source code and data for the paper [INCLURE: a Dataset  and Toolkit for Inclusive French Translation](https://hal.science/hal-04531938) (Lerner and Grouin, 2024).
+
+
+![logo](data/fabienne_barthez.png)
 
 ## getting the INCLURE data
 
